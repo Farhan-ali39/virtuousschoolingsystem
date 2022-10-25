@@ -1,0 +1,1 @@
+add new table tbl_primary_extra_subject_grades
