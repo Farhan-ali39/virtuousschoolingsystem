@@ -4,6 +4,74 @@ if (!defined('BASEPATH')) {
     exit('No direct script access allowed');
 }
 
+if (!function_exists('dd')) {
+    function dd($data)
+    {
+        echo "<pre>";
+        print_r($data);
+        echo "</pre>";
+        die();
+    }
+}
+if (!function_exists('primary_extra_grades')) {
+    function primary_extra_grades($type="core")
+    {
+        if($type == "core")
+        {
+            $extra_subjects = ['nazra','abacus','library','builders','sports'];
+
+        }elseif($type == "progress"){
+            $extra_subjects = ['attendance','neat_attire','discipline','confidence','work_presentation'];
+        }
+        $subjects = [];
+        foreach ($extra_subjects as $extra_subject)
+        {
+            $temp_array=[];
+            $temp_array['key'] = $extra_subject;
+            $subject_name = '';
+            $subject_name_array = explode('_',$extra_subject);
+            $index_count = 0;
+            foreach ($subject_name_array as $name)
+            {
+                if($index_count == 0)
+                {
+                    $subject_name.=$name;
+                }else{
+                    $subject_name.=' ';
+                    $subject_name.=$name;
+                }
+                $index_count++;
+
+            }
+            $temp_array['name'] = $subject_name;
+            $subjects[] = $temp_array;
+        }
+        return $subjects;
+    }
+}
+if (!function_exists('get_subject_name')) {
+    function get_subject_name($data)
+    {
+        $subject_name = '';
+        $subject_name_array = explode('_',$data);
+        $index_count = 0;
+        foreach ($subject_name_array as $name)
+        {
+            if($index_count == 0)
+            {
+                $subject_name.=$name;
+            }else{
+                $subject_name.=' ';
+                $subject_name.=$name;
+            }
+            $index_count++;
+
+        }
+        return $subject_name;
+
+    }
+}
+
 if (!function_exists('is_subAttendence')) {
 
     function is_subAttendence()

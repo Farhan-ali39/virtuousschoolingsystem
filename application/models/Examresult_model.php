@@ -108,7 +108,7 @@ class Examresult_model extends CI_Model {
     }
 
     public function get_exam_result($exam_schedule_id = null, $student_id = null) {
-        $this->db->select()->from('exam_results');
+        $this->db->select('*')->from('exam_results');
         $this->db->where('exam_schedule_id', $exam_schedule_id);
         $this->db->where('student_id', $student_id);
         $query = $this->db->get();
@@ -118,6 +118,7 @@ class Examresult_model extends CI_Model {
             $obj = new stdClass();
             $obj->attendence = 'pre';
             $obj->get_marks = "0.00";
+            $obj->get_grades = "";
             return $obj;
         }
     }
@@ -383,6 +384,44 @@ class Examresult_model extends CI_Model {
 //        die();
         return $result;
 
+
+    }
+
+    public function add_primary_extra_subjects($data)
+    {
+        $this->db->where('student_id', $data['student_id']);
+        $this->db->where('exam_id', $data['exam_id']);
+        $this->db->where('class_id', $data['class_id']);
+        $this->db->where('section_id', $data['section_id']);
+        $q = $this->db->get('tbl_primary_extra_subject_grades');
+        $result = $q->row();
+        if ($q->num_rows() > 0)
+        {
+            $this->db->where('id', $result->id);
+            $this->db->update('tbl_primary_extra_subject_grades', $data);
+            return $result->id;
+        }else{
+            $this->db->insert('tbl_primary_extra_subject_grades', $data);
+            $insert_id = $this->db->insert_id();
+            return $insert_id;
+        }
+    }
+    public function get_primary_extra_subjects($data)
+    {
+        $this->db->select('*')->from('tbl_primary_extra_subject_grades');
+        $this->db->where('student_id', $data['student_id']);
+        $this->db->where('exam_id', $data['exam_id']);
+        $this->db->where('class_id', $data['class_id']);
+        $this->db->where('section_id', $data['section_id']);
+        $query = $this->db->get();
+        if ($query->num_rows() > 0) {
+            return $query->row();
+        } else {
+            $obj = new stdClass();
+            $obj->core_grades = [];
+            $obj->progress_grades = [];
+             return $obj;
+        }
 
     }
 }

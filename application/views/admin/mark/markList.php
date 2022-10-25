@@ -20,7 +20,7 @@
                         <h3 class="box-title"><i class="fa fa-search"></i> <?php echo $this->lang->line('select_criteria'); ?></h3>
                         <div class="box-tools pull-right">
                             <?php if ($this->rbac->hasPrivilege('design_marksheet', 'can_add')) { ?>
-                                <a href="<?php echo base_url(); ?>admin/mark/create" class="btn btn-primary btn-sm"  data-toggle="tooltip" title="<?php echo $this->lang->line('add'); ?>" >
+                                <a href="<?php echo base_url(); ?>admin/mark/subjects" class="btn btn-primary btn-sm"  data-toggle="tooltip" title="<?php echo $this->lang->line('add'); ?>" >
                                     <i class="fa fa-plus"></i> <?php echo $this->lang->line('add'); ?>
                                 </a>
                             <?php } ?>
@@ -126,9 +126,6 @@
                                         <table class="table table-striped table-bordered table-hover example">
                                             <thead>
                                                 <tr>
-<!--                                                    <th>-->
-<!--                                                        --><?php //echo $this->lang->line('admission_no'); ?>
-<!--                                                    </th>-->
                                                     <th>
                                                         <?php echo $this->lang->line('roll_no'); ?>
                                                     </th>
@@ -138,8 +135,6 @@
                                                     <th>
                                                         <?php echo $this->lang->line('father_name'); ?>
                                                     </th>
-
-
                                                     <?php
                                                     $s = 0;
                                                     if ($examSchedule['status'] == "yes") {
@@ -170,29 +165,6 @@
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                <?php
-                                                $s = 0;
-                                                foreach ($examSchedule['result'] as $key => $student) {
-                                                    ?>
-                                                <input type="hidden" name="student[]" value="<?php echo $student['student_id'] ?>">
-
-                                                <?php
-                                                if (!empty($student['exam_array'])) {
-                                                    if ($s == 0) {
-                                                        foreach ($student['exam_array'] as $key => $exam_schedule) {
-                                                            ?>
-                                                            <input type="hidden" name="exam_schedule[]" value="<?php echo $exam_schedule['exam_schedule_id'] ?>">
-                                                            <?php
-                                                        }
-                                                    }
-                                                } else {
-                                                    ?>
-
-                                                    <?php
-                                                }
-                                                $s++;
-                                            }
-                                            ?>
                                             <?php
                                             foreach ($examSchedule['result'] as $key => $student) {
                                                 $total_marks = 0;
@@ -200,9 +172,6 @@
                                                 $result = "Pass";
                                                 ?>
                                                 <tr>
-<!--                                                    <td>-->
-<!--                                                        --><?php //echo $student['admission_no'] ?>
-<!--                                                    </td>-->
                                                     <td>
                                                         <?php echo $student['roll_no'] ?>
                                                     </td>
@@ -214,13 +183,8 @@
                                                     </td>
                                                     <?php
                                                     if (!empty($student['exam_array'])) {
-                                                        count($student['exam_array']);
                                                         $s = 0;
-//                                                        echo "<pre>";
-//                                                        var_dump($student['exam_array']);
-//                                                        die();
                                                         foreach ($student['exam_array'] as $key => $exam_schedule) {
-
                                                             $total_marks = (int) $total_marks + (int) $exam_schedule['full_marks'];
                                                             ?>
                                                             <td align="center">
@@ -251,56 +215,6 @@
                                                                     }
                                                                 }
                                                                 ?>
-                                                                <?php
-
-                                                                $exam_type=$ci->Examresult_model->getExamType($exam_id);
-                                                                if(($exam_type->exam_type==1 && $school_id==2) || ($school_id==1&&$exam_type->exam_type==1)  )
-                                                                {
-                                                                    $get_grades=$ci->Examresult_model->getGrades($student['student_id'],$exam_schedule['exam_result_id']);
-                                                                    
-                                                                    ?>
-                                                                     <br>
-                                                                    <label for="CW">Class Work</label>
-                                                                    <select id="CW" disabled class="form-control" name="class_work<?php echo $student['student_id'] . "_" . $exam_schedule['exam_schedule_id']; ?>" >
-                                                                        <option value="A"  <?php if(isset($get_grades->class_work)){if($get_grades->class_work == "A"){echo "selected";}} ?> >A</option>
-                                                                        <option value="B"  <?php if(isset($get_grades->class_work)){if($get_grades->class_work == "B"){echo "selected";}} ?> >B</option>
-                                                                        <option value="C" <?php if(isset($get_grades->class_work)){if($get_grades->class_work == "C"){echo "selected";}} ?>>C</option>
-                                                                        <option value="D" <?php if(isset($get_grades->class_work)){if($get_grades->class_work == "D"){echo "selected";}} ?>>D</option>
-
-                                                                    </select>
-                                                                    <label for="CW">Home Work</label>
-                                                                    <select class="form-control" disabled name="home_work<?php echo $student['student_id'] . "_" . $exam_schedule['exam_schedule_id']; ?>" >
-                                                                        <option value="A" <?php  if(isset($get_grades->home_work)){if($get_grades->home_work == "A"){echo "selected";}}  ?> >A</option>
-                                                                        <option value="B" <?php if(isset($get_grades->home_work)){if($get_grades->home_work == "B"){echo "selected";}}  ?> >B</option>
-                                                                        <option value="C" <?php if(isset($get_grades->home_work)){if($get_grades->home_work == "C"){echo "selected";}}  ?>>C</option>
-                                                                        <option value="D" <?php if(isset($get_grades->home_work)){if($get_grades->home_work == "D"){echo "selected";}}  ?>>D</option>
-                                                                    </select>
-                                                                    <label for="CW">Behaviour</label>
-                                                                    <select class="form-control" disabled name="behaviour<?php echo $student['student_id'] . "_" . $exam_schedule['exam_schedule_id']; ?>" >
-                                                                        <option value="A" <?php if(isset($get_grades->behaviour)){if($get_grades->behaviour == "A"){echo "selected";}}   ?> >A</option>
-                                                                        <option value="B" <?php if(isset($get_grades->behaviour)){if($get_grades->behaviour == "B"){echo "selected";}} ?> >B</option>
-                                                                        <option value="C" <?php if(isset($get_grades->behaviour)){if($get_grades->behaviour == "C"){echo "selected";}}  ?>>C</option>
-                                                                        <option value="D" <?php if(isset($get_grades->behaviour)){if($get_grades->behaviour == "D"){echo "selected";}}  ?>>D</option>
-                                                                    </select>
-                                                                    <?php
-                                                                }
-                                                                if($exam_type->exam_type==2 && $school_id==1)
-                                                                {
-                                                                    if (isset($exam_schedule['attendence'])) {
-
-                                                                        ?>
-                                                                        <button style="margin: 5px" type="button"
-                                                                                class="btn btn-primary "
-                                                                                name="extra_grade_ " data-toggle="modal"
-                                                                                onclick="get_subject_extras(<?= $exam_schedule["subject_id"] ?>,<?= $student['student_id'] ?>)"
-                                                                                data-target="#extra_grade">View Extra
-                                                                            Grade
-                                                                        </button>
-                                                                        <?php
-                                                                    }
-                                                                }
-                                                                ?>
-
                                                             </td>
                                                             <?php
                                                         }
@@ -313,12 +227,9 @@
                                                             if($school_id==1)
                                                             {
                                                                 echo $obtain_marks;
-//                                                                $per=$obtain_marks;
-//                                                                echo $pre;
                                                             }else{
                                                                 $per = $obtain_marks * 100 / $total_marks;
                                                                 echo number_format($per, 2, '.', '');
-
                                                             }
                                                             ?>
 
@@ -334,129 +245,25 @@
                                                             echo $result;
                                                             echo "<label/>";
                                                             ?></th>
-                                                        <th><?php
+                                                        <th>
+                                                            <?php
 
-                                                            $remarks=$this->Examresult_model->getRemarks($student['student_id'],$exam_id);
-                                                            //                                                            var_dump($remarks);
-                                                            //                                                            die();
-
-                                                            //                                                            if ($result == "Pass") {
-
-                                                            //                                                                echo "<label class='label label-success'>";
-                                                            //                                                            } else {
-                                                            //
-                                                            //                                                                echo "<label class='label label-danger'>";
-                                                            //                                                            }
-                                                            if(!empty($remarks))
+                                                            $remarks_data = $this->Examresult_model->getRemarks($student['student_id'],$exam_id);
+                                                            $remarks = "";
+                                                            if(!empty($remarks_data))
                                                             {
-                                                                echo $remarks->remarks;
-                                                            }else
-                                                            {
-                                                                echo "";
+                                                                $remarks =  $remarks_data->remarks;
                                                             }
-                                                            //                                                            echo "<label/>";
-                                                            ?>
+                                                             ?>
+                                                            <i class="fa fa-info-circle" data-toggle="tooltip"   title="<?=$remarks?>" ></i>
                                                         </th>
-                                                        <?php
-                                                    } else {
-                                                        ?>
-
                                                         <?php
                                                     }
                                                     ?>
-
                                                 </tr>
-
-                                                <?php
-                                                $exam_type=$ci->Examresult_model->getExamType($exam_id);
-                                                if($exam_type->exam_type==2 && $school_id==2)
-                                                {
-                                                    $get_mid_term_extra_grades=$ci->Examresult_model->getMidTermExtrsGrades($student['student_id']);
-                                                    ?>
-
-                                                    <tr >
-                                                        <td></td>
-                                                        <td>
-                                                            <label for="">PUNCTUALITY</label>
-                                                            <select class="form-control" disabled style="width: 95px;" name="PUNCTUALITY<?php echo $student['student_id']; ?>" >
-                                                                <option value="EX" <?php if($get_mid_term_extra_grades->PUNCTUALITY == "EX"){echo "selected";} ?> >EX</option>
-                                                                <option value="G"  <?php if($get_mid_term_extra_grades->PUNCTUALITY == "G"){echo "selected";} ?> >G</option>
-                                                                <option value="S"  <?php if($get_mid_term_extra_grades->PUNCTUALITY == "S"){echo "selected";} ?> >S</option>
-                                                                <option value="N.I"  <?php if($get_mid_term_extra_grades->PUNCTUALITY == "N.I"){echo "selected";} ?>>N.I</option>
-                                                            </select>
-                                                        </td>
-                                                        <td>
-                                                            <label for="">ART</label>
-                                                            <select class="form-control " disabled style="width: 95px;" name="Art<?php echo $student['student_id']; ?>" >
-                                                                <option value="EX" <?php if($get_mid_term_extra_grades->Art == "EX"){echo "selected";} ?> >EX</option>
-                                                                <option value="G"  <?php if($get_mid_term_extra_grades->Art == "G"){echo "selected";} ?> >G</option>
-                                                                <option value="S"  <?php if($get_mid_term_extra_grades->Art == "S"){echo "selected";} ?> >S</option>
-                                                                <option value="N.I"  <?php if($get_mid_term_extra_grades->Art == "N.I"){echo "selected";} ?>>N.I</option>
-                                                            </select>
-                                                        </td>
-                                                        <td>
-                                                            <label for="">ATTENDANCE</label>
-                                                            <select class="form-control " disabled style="width: 95px;" name="ATTENDANCE<?php echo $student['student_id']; ?>" >
-                                                                <option value="EX" <?php if($get_mid_term_extra_grades->ATTENDANCE == "EX"){echo "selected";} ?> >EX</option>
-                                                                <option value="G"  <?php if($get_mid_term_extra_grades->ATTENDANCE == "G"){echo "selected";} ?> >G</option>
-                                                                <option value="S"  <?php if($get_mid_term_extra_grades->ATTENDANCE == "S"){echo "selected";} ?> >S</option>
-                                                                <option value="N.I"  <?php if($get_mid_term_extra_grades->ATTENDANCE == "N.I"){echo "selected";} ?>>N.I</option>
-                                                            </select>
-                                                        </td>
-                                                        <td>
-                                                            <label for="">CLASS WORK</label>
-                                                            <select class="form-control " disabled style="width: 95px;" name="CLASS_WORK<?php echo $student['student_id']; ?>" >
-                                                                <option value="EX" <?php if($get_mid_term_extra_grades->CLASS_WORK == "EX"){echo "selected";} ?> >EX</option>
-                                                                <option value="G"  <?php if($get_mid_term_extra_grades->CLASS_WORK == "G"){echo "selected";} ?> >G</option>
-                                                                <option value="S"  <?php if($get_mid_term_extra_grades->CLASS_WORK == "S"){echo "selected";} ?> >S</option>
-                                                                <option value="N.I"  <?php if($get_mid_term_extra_grades->CLASS_WORK == "N.I"){echo "selected";} ?>>N.I</option>
-                                                            </select>
-                                                        </td>
-                                                        <td>
-                                                            <label for="">HOME WORK</label>
-                                                            <select class="form-control " disabled style="width: 95px;" name="Home_work<?php echo $student['student_id']; ?>" >
-                                                                <option value="EX" <?php if($get_mid_term_extra_grades->Home_work == "EX"){echo "selected";} ?> >EX</option>
-                                                                <option value="G"  <?php if($get_mid_term_extra_grades->Home_work == "G"){echo "selected";} ?> >G</option>
-                                                                <option value="S"  <?php if($get_mid_term_extra_grades->Home_work == "S"){echo "selected";} ?> >S</option>
-                                                                <option value="N.I"  <?php if($get_mid_term_extra_grades->Home_work == "N.I"){echo "selected";} ?>>N.I</option>
-                                                            </select>
-                                                        </td>
-                                                        <td>
-                                                            <label for="">P.E & GAME</label>
-                                                            <select class="form-control " disabled style="width: 95px;" name="GAME<?php echo $student['student_id']; ?>" >
-                                                                <option value="EX" <?php if($get_mid_term_extra_grades->GAME == "EX"){echo "selected";} ?> >EX</option>
-                                                                <option value="G"  <?php if($get_mid_term_extra_grades->GAME == "G"){echo "selected";} ?> >G</option>
-                                                                <option value="S"  <?php if($get_mid_term_extra_grades->GAME == "S"){echo "selected";} ?> >S</option>
-                                                                <option value="N.I"  <?php if($get_mid_term_extra_grades->GAME == "N.I"){echo "selected";} ?>>N.I</option>
-                                                            </select>
-                                                        </td>
-                                                        <td>
-                                                            <label for="">CONDUCT</label>
-                                                            <select class="form-control "  disabled style="width: 95px;" name="CONDUCT<?php echo $student['student_id']; ?>" >
-                                                                <option value="EX" <?php if($get_mid_term_extra_grades->CONDUCT == "EX"){echo "selected";} ?> >EX</option>
-                                                                <option value="G"  <?php if($get_mid_term_extra_grades->CONDUCT == "G"){echo "selected";} ?> >G</option>
-                                                                <option value="S"  <?php if($get_mid_term_extra_grades->CONDUCT == "S"){echo "selected";} ?> >S</option>
-                                                                <option value="N.I"  <?php if($get_mid_term_extra_grades->CONDUCT == "N.I"){echo "selected";} ?>>N.I</option>
-                                                            </select>
-                                                        </td>
-                                                        <td>
-                                                            <label for="">PRESENTATION</label>
-                                                            <select class="form-control "   disabled style="width: 95px;" name="PRESENTATION<?php echo $student['student_id']; ?>" >
-                                                                <option value="EX" <?php if($get_mid_term_extra_grades->PRESENTATION == "EX"){echo "selected";} ?> >EX</option>
-                                                                <option value="G"  <?php if($get_mid_term_extra_grades->PRESENTATION == "G"){echo "selected";} ?> >G</option>
-                                                                <option value="S"  <?php if($get_mid_term_extra_grades->PRESENTATION == "S"){echo "selected";} ?> >S</option>
-                                                                <option value="N.I"  <?php if($get_mid_term_extra_grades->PRESENTATION == "N.I"){echo "selected";} ?>>N.I</option>
-                                                            </select>
-                                                        </td>
-                                                    </tr>
-                                                    <?php
-                                                }
-                                                ?>
-
-                                                <?php
+                                                 <?php
                                             }
                                             ?>
-
                                             </tbody>
                                         </table>
                                     </div>
@@ -581,7 +388,10 @@
         });
     });
     $(document).on('change', '#section_id', function (e) {
-        $("form#schedule-form").submit();
+        if($(this).val() != "")
+        {
+            $("form#schedule-form").submit();
+        }
     });
     function get_school_classes() {
         var school_id=  $('#school_id').val();

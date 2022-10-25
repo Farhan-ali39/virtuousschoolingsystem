@@ -147,8 +147,136 @@ class Mark extends Admin_Controller {
                die();
     }
 
+    function subjects() {
+        $session = $this->setting_model->getCurrentSession();
+        $data['title'] = 'Exam Schedule';
+        $data['exam_id'] = "";
+        $data['class_id'] = "";
+        $data['section_id'] = "";
+        $exam = $this->exam_model->get();
+        $class = $this->class_model->get(null,null,1);
+        $data['school_id']=1;
+        $data['examlist'] = $exam;
+        $data['classlist'] = $class;
+        $userdata = $this->customlib->getUserData();
+
+        $feecategory = $this->feecategory_model->get();
+        $data['feecategorylist'] = $feecategory;
+        $this->form_validation->set_rules('exam_id', 'Exam', 'trim|required|xss_clean');
+        $this->form_validation->set_rules('class_id', 'Class', 'trim|required|xss_clean');
+        $this->form_validation->set_rules('section_id', 'Section', 'trim|required|xss_clean');
+        if ($this->form_validation->run() == FALSE) {
+
+            $this->load->view('layout/header', $data);
+            $this->load->view('admin/mark/markCreate', $data);
+            $this->load->view('layout/footer', $data);
+        }else{
+            $exam_id = $this->input->post('exam_id');
+            $class_id = $this->input->post('class_id');
+            $section_id = $this->input->post('section_id');
+            $school_id=$this->input->post('school_id');
+            $exam_schedule_id=$this->input->post('exam_schedule_id');
+            $data['school_id']=$school_id;
+            $data['exam_id'] = $exam_id;
+            $data['class_id'] = $class_id;
+            $data['section_id'] = $section_id;
+            $class = $this->class_model->get(null,null,$school_id);
+            $data['classlist'] = $class;
+            $userdata = $this->customlib->getUserData();
+            $getTeacherSubjects = array();
+            if (($userdata["role_id"] == 2) && ($userdata["class_teacher"] == "yes")) {
+                $getTeacherSubjects = $this->examschedule_model->getTeacherSubjects($class_id, $section_id, $userdata["id"]);
+            }
+            $data["teacher_subjects"] = $getTeacherSubjects;
+
+            $schedule_subjects = $this->examschedule_model->getDetailbyClsandSection($class_id, $section_id, $exam_id);
+            $data['schedule_subjects'] = $schedule_subjects;
+            $data['exam_schedule_id'] = $exam_schedule_id;
+
+            if($exam_schedule_id != 0 and $exam_schedule_id != "")
+            {
+                $data['examSchedule'] = $this->get_subject_marks_register($exam_schedule_id,$class_id, $section_id,$schedule_subjects,$school_id,$exam_id);
+            }
+            $this->load->view('layout/header', $data);
+            $this->load->view('admin/mark/markCreate', $data);
+            $this->load->view('layout/footer', $data);
+        }
+
+    }
+    private function get_subject_marks_register($exam_schedule_id,$class_id, $section_id,$examSchedule,$school_id,$exam_id)
+    {
+        if (!empty($exam_schedule_id)) {
+            $studentList = $this->student_model->searchByClassSection($class_id, $section_id);
+
+            $new_array = array();
+            foreach ($studentList as $stu_key => $stu_value) {
+                $array = array();
+                $array['student_id'] = $stu_value['id'];
+                $array['admission_no'] = $stu_value['admission_no'];
+                $array['roll_no'] = $stu_value['roll_no'];
+                $array['firstname'] = $stu_value['firstname'];
+                $array['lastname'] = $stu_value['lastname'];
+                $array['dob'] = $stu_value['dob'];
+                $array['father_name'] = $stu_value['father_name'];
+                $exam_array = array();
+                foreach ($examSchedule as $ex_key => $ex_value)if($exam_schedule_id == $ex_value['id']) {
+                    $exam_array['exam_schedule_id'] = $ex_value['id'];
+                    $exam_array['exam_id'] = $ex_value['exam_id'];
+                    $exam_array['subject_id'] = $ex_value['subject_id'];
+                    $exam_array['full_marks'] = $ex_value['full_marks'];
+                    $exam_array['passing_marks'] = $ex_value['passing_marks'];
+                    $exam_array['exam_name'] = $ex_value['name'];
+                    $exam_array['exam_type'] = $ex_value['type'];
+                    $student_exam_result = $this->examresult_model->get_exam_result($ex_value['id'], $stu_value['id']);
+
+                    if (empty($student_exam_result)) {
+                        $exam_array['exam_result_id']=0;
+
+                    } else {
+                        $exam_array['attendence'] = $student_exam_result->attendence;
+                        if ($school_id==1)
+                        {
+                            $exam_array['get_marks'] = $student_exam_result->get_grades;
+
+                        }elseif($school_id==2)
+                        {
+                            $exam_array['get_marks'] = $student_exam_result->get_marks;
+                        }
+                        if(isset($student_exam_result->id)){
+                            $exam_array['exam_result_id']=$student_exam_result->id;
+                        }else
+                        {
+                            $exam_array['exam_result_id']=0;
+                        }
+                    }
+                }
+                $array['exam_array'] = $exam_array;
+                 if($school_id == 2)
+                 {
+                     $wData['class_id'] = $class_id;
+                     $wData['section_id'] = $section_id;
+                     $wData['student_id'] = $stu_value['id'];
+                     $wData['exam_id'] = $exam_id;
+                     $extra_subjects_result = $this->examresult_model->get_primary_extra_subjects($wData);
+                     if(!empty($extra_subjects_result->core_grades))
+                     {
+                         $core_grades = json_decode($extra_subjects_result->core_grades);
+                         $array['core_grades'] = $core_grades;
+                     }
+                     if(!empty($extra_subjects_result->progress_grades))
+                     {
+                         $progress_grades = json_decode($extra_subjects_result->progress_grades);
+                         $array['progress_grades'] = $progress_grades;
+                     }
+                 }
+                $new_array[] = $array;
+            }
+        }
+//        dd($new_array);
+         return $new_array;
+    }
     function create() {
-        
+
         $session = $this->setting_model->getCurrentSession();
         $data['title'] = 'Exam Schedule';
         $data['exam_id'] = "";
@@ -171,9 +299,9 @@ class Mark extends Admin_Controller {
             $this->load->view('layout/header', $data);
             $this->load->view('admin/mark/markCreate', $data);
             $this->load->view('layout/footer', $data);
-        } else {
+        }
+        else {
              
-            $feecategory_id = $this->input->post('feecategory_id');
             $exam_id = $this->input->post('exam_id');
             $class_id = $this->input->post('class_id');
             $section_id = $this->input->post('section_id');
@@ -249,12 +377,6 @@ class Mark extends Admin_Controller {
             }
              
             if ($this->input->post('save_exam_btn') == "save_exam") {
-                // $max_input_vars = ini_get('max_input_vars');
-        // echo $max_input_vars;
-            //     echo "/<pre>";
-            //   print_r($_POST);
-            //     die();
-
                 $school_id=$this->input->post('school_id');
                 $ex_array = array();
                 $exam_id = $this->input->post('exam_id');
@@ -276,49 +398,51 @@ class Mark extends Admin_Controller {
                             if ($school_id==1)
                             {
                                  $record['get_grades'] = $this->input->post('student_number' . $student . "_" . $exam);
-
-
                             }elseif($school_id==2)
                             {
                                 $record['get_marks'] = $this->input->post('student_number' . $student . "_" . $exam);
-
                             }
-                        } else {
+                        }
+                        else {
                             $record['attendence'] = $this->input->post('student_absent' . $student . "_" . $exam);
                         }
-                        
-//                         echo $school_id."<br>";
-                        
                         $record['exam_schedule_id'] = $exam;
                         $record['student_id'] = $student;
                         $inserted_id = $this->examresult_model->add_exam_result($record,$school_id);
-
-
-// 
-//                         $inserted_id=false;
                         if ($inserted_id) {
-
-                            if(isset($_POST['class_work' . $student . "_" . $exam]))
-                            {
-
-                                $class_work = $this->input->post('class_work' . $student . "_" . $exam);
-                                $home_work = $this->input->post('home_work' . $student . "_" . $exam);
-                                $behaviour = $this->input->post('behaviour' . $student . "_" . $exam);
-
-                                $grade_data=array(
-                                    'exam_result_id'=>$inserted_id,
-                                    'student_id'=>$student,
-                                    'class_work'=>$class_work,
-                                    'home_work'=>$home_work,
-                                    'behaviour'=>$behaviour,
-                                );
-//                                print_r($grade_data);
-                                $this->examresult_model->add_exam_result_grade($grade_data);
-                            }
-//                            echo "here";
-
                             $ex_array[$student] = $exam_id;
                         }
+                    }
+                    if($school_id==2)
+                    {
+                        $core_subjects = primary_extra_grades('core');
+                        $progress_subjects = primary_extra_grades('progress');
+                        $core_subjects_grades = [];
+                        $progress_subjects_grades = [];
+                        $extra_subjects_data['student_id'] = $student;
+                        $extra_subjects_data['class_id'] = $class_id;
+                        $extra_subjects_data['section_id'] = $section_id;
+                        $extra_subjects_data['exam_id'] = $exam_id;
+                        foreach ($progress_subjects as $progress_subject)
+                        {
+                            $progress_subjects_grades[$progress_subject['key']] = "";
+                            if(!empty($this->input->post($progress_subject['key']. "_" . $student . "_" . $exam)))
+                            {
+                                $progress_subjects_grades[$progress_subject['key']] =$this->input->post($progress_subject['key']. "_" . $student . "_" . $exam);
+                            }
+                        }
+                        foreach ($core_subjects as $core_subject)
+                        {
+                            $core_subjects_grades[$core_subject['key']] = "";
+                            if(!empty($this->input->post($core_subject['key']. "_" . $student . "_" . $exam)))
+                            {
+                                $core_subjects_grades[$core_subject['key']] =$this->input->post($core_subject['key']. "_" . $student . "_" . $exam);
+                            }
+                        }
+                        $extra_subjects_data['core_grades'] = json_encode($core_subjects_grades);
+                        $extra_subjects_data['progress_grades'] = json_encode($progress_subjects_grades);
+                        $this->examresult_model->add_primary_extra_subjects($extra_subjects_data);
+
                     }
                     if ($this->input->post('remarks_'.$student) != "") {
 
@@ -332,52 +456,13 @@ class Mark extends Admin_Controller {
 
 
                     }
-               
-
-
-//                echo "<pre>";
-//                var_dump($record);
-//                die();
-
-//                die();
-                // echo $student;
-                if(isset($_POST['PUNCTUALITY'.$student]))
-                {
-
-                    $PUNCTUALITY = $this->input->post('PUNCTUALITY'.$student);
-                    $Art = $this->input->post('Art'.$student);
-                    $ATTENDANCE = $this->input->post('ATTENDANCE'.$student);
-                    $CLASS_WORK = $this->input->post('CLASS_WORK'.$student);
-                    $Home_work = $this->input->post('Home_work'.$student);
-                    $GAME = $this->input->post('GAME'.$student);
-                    $CONDUCT = $this->input->post('CONDUCT'.$student);
-                    $PRESENTATION = $this->input->post('PRESENTATION'.$student);
-                    $grade_data=array(
-                        'student_id'=>$student,
-                        'PUNCTUALITY'=>$PUNCTUALITY,
-                        'Art'=>$Art,
-                        'ATTENDANCE'=>$ATTENDANCE,
-                        'CLASS_WORK'=>$CLASS_WORK,
-                        'Home_work'=>$Home_work,
-                        'GAME'=>$GAME,
-                        'CONDUCT'=>$CONDUCT,
-                        'PRESENTATION'=>$PRESENTATION,
-                    );
-
-                    // echo "<pre>";
-                    // var_dump($grade_data);
-                    $this->examresult_model->addMidTermGrade($grade_data);
                 }
- }
 
                 if (!empty($ex_array)) {
                     $this->mailsmsconf->mailsms('exam_result', $ex_array, NULL, $exam_array);
                 }
                                $message='Marks of all the students have been added successfully';
                 $this->session->set_flashdata('msg', '<div class="alert alert-success">' . $message . '</div>');
-
-                // die();
-
                 redirect('admin/mark');
             }
 
@@ -591,8 +676,6 @@ class Mark extends Admin_Controller {
                         $exam_array['exam_name'] = $ex_value['name'];
                         $exam_array['exam_type'] = $ex_value['type'];
                         $student_exam_result = $this->examresult_model->get_result($ex_value['id'], $stu_value['id']);
-//                        var_dump($student_exam_result);
-//                        die();
                         $exam_array['attendence'] = $student_exam_result->attendence;
                          if ($school_id==1)
                             {
@@ -626,54 +709,8 @@ class Mark extends Admin_Controller {
                     }
                     $array['exam_array'] = $x;
                     $new_array[] = $array;
-                    if($exam_type->type==3)
-                    {
-                        $this->db->select("*");
-                        $this->db->where('type', 1);
-                        $q = $this->db->get('exams');
-                        $first = $q->row();
-                        if(!empty($first))
-                        {
-                            $first_data[$stu_value['id']]=$this->getAssessmentData($class_id, $section_id, $first->id);
-                        }
-
-
-
-                        $this->db->select("*");
-                        $this->db->where('type', 2);
-                        $q = $this->db->get('exams');
-                        $second = $q->row();
-                        if(!empty($second))
-                        {
-                            $second_data[$stu_value['id']]=$this->getAssessmentData($class_id, $section_id, $second->id);
-                        }
-
-
-                    }
-                    if($exam_type->type==6)
-                    {
-                        $this->db->select("*");
-                        $this->db->where('type', 4);
-                        $q = $this->db->get('exams');
-                        $first = $q->row();
-                        $first_data[$stu_value['id']]=$this->getAssessmentData($class_id, $section_id, $first->id);
-
-                        $this->db->select("*");
-                        $this->db->where('type', 5);
-                        $q = $this->db->get('exams');
-                        $second = $q->row();
-                        $second_data[$stu_value['id']]=$this->getAssessmentData($class_id, $section_id, $second->id);
-                    }
-                }
-                if(isset($first_data) || isset($second_data))
-                {
-                    $data['first_assessment_marks']=$first_data;
-                    $data['second_assessment_marks']=$second_data;
-
                 }
                 $data['examSchedule']['result'] = $new_array;
-
-
             }
             else {
                 $s = array('status' => 'no');
@@ -736,6 +773,111 @@ class Mark extends Admin_Controller {
 
 
 
+        }
+
+    }
+    function print_marks_report()
+    {
+        $students=$this->input->post('student');
+        $exam_type=$this->input->post('examType');
+        $exam_id=$this->input->post('exam_id');
+        $class_id = $this->input->post('class_id');
+        $section_id = $this->input->post('section_id');
+        $school_id=$this->input->post('school_id');
+        $class = $this->class_model->get(null,null,$school_id);
+
+        if(!empty($_POST['print_all']) and $_POST['print_all'] == "all")
+        {
+            $data['school_id']=$school_id;
+            $data['exam_id'] = $exam_id;
+            $data['class_id'] = $class_id;
+            $data['section_id'] = $section_id;
+            $examSchedule = $this->examschedule_model->getDetailbyClsandSection($class_id, $section_id, $exam_id);
+            $studentList = $this->student_model->searchByClassSection($class_id, $section_id);
+            $class_info = $this->class_model->get($class_id);
+            $data['examSchedule'] = array();
+            if (!empty($examSchedule)) {
+                $new_array = array();
+                $data['examSchedule']['status'] = "yes";
+                foreach ($studentList as $stu_key => $stu_value) {
+                    $array = array();
+                    $array['student_id'] = $stu_value['id'];
+                    $array['roll_no'] = $stu_value['roll_no'];
+                    $array['firstname'] = $stu_value['firstname'];
+                    $array['lastname'] = $stu_value['lastname'];
+                    $array['admission_no'] = $stu_value['admission_no'];
+                    $array['dob'] = $stu_value['dob'];
+                    $array['father_name'] = $stu_value['father_name'];
+                    $array['class_info'] = $class_info['class'];
+                    $array['current_session'] = $this->setting_model->getCurrentSessionName();
+                    $array['exam_info'] = $this->examresult_model->getExamType($exam_id)->name;
+                    $x = array();
+                    foreach ($examSchedule as $ex_key => $ex_value) {
+                        $exam_array = array();
+                        $exam_array['exam_schedule_id'] = $ex_value['id'];
+                        $exam_array['exam_id'] = $ex_value['exam_id'];
+                        $exam_array['full_marks'] = $ex_value['full_marks'];
+                        $exam_array['subject_id'] = $ex_value['subject_id'];
+                        $exam_array['passing_marks'] = $ex_value['passing_marks'];
+                        $exam_array['exam_name'] = $ex_value['name'];
+                        $exam_array['exam_type'] = $ex_value['type'];
+                        $student_exam_result = $this->examresult_model->get_result($ex_value['id'], $stu_value['id']);
+                         if (empty($student_exam_result)) {
+                            $exam_array['exam_result_id']=0;
+                        } else {
+                            $exam_array['attendence'] = $student_exam_result->attendence;
+                            if ($school_id==1)
+                            {
+                                $exam_array['get_marks'] = $student_exam_result->get_grades;
+
+                            }elseif($school_id==2)
+                            {
+                                $exam_array['get_marks'] = $student_exam_result->get_marks;
+
+                            }
+                            $exam_array['exam_result_id']=$student_exam_result->id;
+
+                        }
+                        $x[] = $exam_array;
+                    }
+                    if (empty($x)) {
+                        $data['examSchedule']['status'] = "no";
+                    }
+                    $array['exam_array'] = $x;
+                    $array['student_remarks'] = "";
+                    $remarks_data = $this->examresult_model->getRemarks($stu_value['id'],$exam_id);
+                    if(!empty($remarks_data))
+                    {
+                        $array['student_remarks'] = $remarks_data->remarks;
+                    }
+                    if($school_id == 2)
+                    {
+                        $wData['class_id'] = $class_id;
+                        $wData['section_id'] = $section_id;
+                        $wData['student_id'] = $stu_value['id'];
+                        $wData['exam_id'] = $exam_id;
+                        $extra_subjects_result = $this->examresult_model->get_primary_extra_subjects($wData);
+                        if(!empty($extra_subjects_result->core_grades))
+                        {
+                            $core_grades = json_decode($extra_subjects_result->core_grades);
+                            $array['core_grades'] = $core_grades;
+                        }
+                        if(!empty($extra_subjects_result->progress_grades))
+                        {
+                            $progress_grades = json_decode($extra_subjects_result->progress_grades);
+                            $array['progress_grades'] = $progress_grades;
+                        }
+                    }
+                    $new_array[] = $array;
+                }
+
+                $data['examSchedule']['result'] = $new_array;
+
+            } else {
+                $s = array('status' => 'no');
+                $data['examSchedule'] = $s;
+            }
+             $this->load->view('admin/mark/print_exam_report', $data);
         }
 
     }
