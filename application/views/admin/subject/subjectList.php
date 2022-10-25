@@ -34,7 +34,14 @@
                                     <input autofocus="" id="category" name="name" placeholder="" type="text" class="form-control"  value="<?php echo set_value('name'); ?>" />
                                     <span class="text-danger"><?php echo form_error('name'); ?></span>
                                 </div>
-                                   <?php
+                                <div class="form-group">
+                                    <label class="checkbox-inline">
+                                        <input type="checkbox" value="1" name="compare"  <?php if (set_value('compare') == 1){ echo "checked"; } ?>>
+                                        Compare For Exam Report
+                                    </label>
+                                </div>
+
+                                <?php
 
                                     foreach ($subject_types as $subject_type_key => $subject_type_value) {
                                     ?>

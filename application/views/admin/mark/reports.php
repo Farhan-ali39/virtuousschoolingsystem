@@ -134,7 +134,12 @@
                                                             ?>
                                                             <th>
                                                                 <?php
-                                                                echo $exam_schedule['exam_name'] . "<br/> (" . substr($exam_schedule['exam_type'], 0, 2) . ": " . $exam_schedule['passing_marks'] . "/" . $exam_schedule['full_marks'] . ") ";
+                                                                if($school_id == 1)
+                                                                {
+                                                                    echo $exam_schedule['exam_name'];
+                                                                }else{
+                                                                    echo $exam_schedule['exam_name'] . "<br/> (" . substr($exam_schedule['exam_type'], 0, 2) . ": " . $exam_schedule['passing_marks'] . "/" . $exam_schedule['full_marks'] . ") ";
+                                                                }
                                                                 ?>
                                                             </th>
                                                             <?php
@@ -144,9 +149,24 @@
                                                 }
                                             }
                                             ?>
-                                            <th><?php echo $this->lang->line('grand_total'); ?></th>
-                                            <th><?php echo $this->lang->line('percent') . ' (%)'; ?></th>
-                                            <th><?php echo $this->lang->line('result'); ?></th>
+                                            <?php
+                                            if($school_id == 1)
+                                            {
+                                                ?>
+                                                <th>Highest Grade</th>
+                                                <th>Grade (%)</th>
+                                                <th><?php echo $this->lang->line('result'); ?></th>
+
+                                                <?php
+                                            }else{
+                                                ?>
+                                                <th><?php echo $this->lang->line('grand_total'); ?></th>
+                                                <th><?php echo $this->lang->line('percent') . ' (%)'; ?></th>
+                                                <th><?php echo $this->lang->line('result'); ?></th>
+
+                                                <?php
+                                            }
+                                            ?>
                                             <th>
                                                 Action
                                             </th>
@@ -202,7 +222,8 @@
                                                                 $result = "N/A";
                                                             } else {
                                                                 if ($exam_schedule['attendence'] == "pre") {
-                                                                    echo $get_marks_student = $exam_schedule['get_marks'];
+                                                                    echo (!empty($exam_schedule['get_marks']))?$exam_schedule['get_marks']:'N/A';
+                                                                     $get_marks_student = $exam_schedule['get_marks'];
                                                                     $passing_marks_student = $exam_schedule['passing_marks'];
                                                                     if ($result == "Pass") {
                                                                         if ($get_marks_student < $passing_marks_student) {
@@ -229,15 +250,22 @@
                                                     }
                                                     ?>
                                                     </td>
-                                                    <td> <?php echo $obtain_marks . " /" . $total_marks; ?> </td>
+                                                    <td> <?php
+                                                        if($school_id == 1)
+                                                        {
+                                                            echo 'A';
+                                                        }else{
+                                                            echo $obtain_marks . " /" . $total_marks;
+                                                        }
+                                                        ?>
+                                                    </td>
                                                     <td> <?php
                                                         if($school_id==1)
                                                         {
-                                                            echo $obtain_marks;
-                                                         }else{
+                                                            echo (!empty($obtain_marks))?$obtain_marks:'N/A';
+                                                          }else{
                                                             $per = $obtain_marks * 100 / $total_marks;
                                                             echo number_format($per, 2, '.', '');
-
                                                         }
                                                         ?>
 
