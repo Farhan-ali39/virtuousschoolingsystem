@@ -30,6 +30,9 @@
                                 <input type="radio" value="Theory" name="type"  <?php if (set_value('type') == "Theory") echo "checked"; ?> checked><?php echo $this->lang->line('theory'); ?>
                             </label>
                             <label class="radio-inline">
+                                <input type="checkbox" value="compare" name="compare"  <?php if (set_value('compare') == "compare") echo "checked"; ?> checked>Compare For Exam Report
+                            </label>
+                            <label class="radio-inline">
                                 <input type="radio" name="type" <?php if (set_value('type') == "Practical") echo "checked"; ?> value="Practical"><?php echo $this->lang->line('practical'); ?>
                             </label>
                             <div class="form-group">

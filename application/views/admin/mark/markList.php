@@ -144,7 +144,12 @@
                                                                     ?>
                                                                     <th>
                                                                         <?php
-                                                                        echo $exam_schedule['exam_name'] . "<br/> (" . substr($exam_schedule['exam_type'], 0, 2) . ": " . $exam_schedule['passing_marks'] . "/" . $exam_schedule['full_marks'] . ") ";
+                                                                        if($school_id == 1)
+                                                                        {
+                                                                            echo $exam_schedule['exam_name'];
+                                                                        }else{
+                                                                            echo $exam_schedule['exam_name'] . "<br/> (" . substr($exam_schedule['exam_type'], 0, 2) . ": " . $exam_schedule['passing_marks'] . "/" . $exam_schedule['full_marks'] . ") ";
+                                                                        }
                                                                         ?>
                                                                     </th>
                                                                     <?php
@@ -206,7 +211,6 @@
                                                                             $obtain_marks=$exam_schedule['get_marks'];
                                                                         }else{
                                                                             $obtain_marks = $obtain_marks + $exam_schedule['get_marks'];
-
                                                                         }
                                                                     } else {
                                                                         $result = "Fail";

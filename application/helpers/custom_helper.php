@@ -72,6 +72,15 @@ if (!function_exists('get_subject_name')) {
     }
 }
 
+if (!function_exists('set_key_from_subject_name')) {
+    function set_key_from_subject_name($data)
+    {
+        $subject_name = str_replace(' ', '_', strtolower($data));
+        return $subject_name;
+
+    }
+}
+
 if (!function_exists('is_subAttendence')) {
 
     function is_subAttendence()

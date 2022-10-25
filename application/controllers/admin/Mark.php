@@ -218,11 +218,13 @@ class Mark extends Admin_Controller {
                 $array['lastname'] = $stu_value['lastname'];
                 $array['dob'] = $stu_value['dob'];
                 $array['father_name'] = $stu_value['father_name'];
+                $subject_id = 0;
                 $exam_array = array();
                 foreach ($examSchedule as $ex_key => $ex_value)if($exam_schedule_id == $ex_value['id']) {
                     $exam_array['exam_schedule_id'] = $ex_value['id'];
                     $exam_array['exam_id'] = $ex_value['exam_id'];
                     $exam_array['subject_id'] = $ex_value['subject_id'];
+                    $subject_id = $ex_value['subject_id'];
                     $exam_array['full_marks'] = $ex_value['full_marks'];
                     $exam_array['passing_marks'] = $ex_value['passing_marks'];
                     $exam_array['exam_name'] = $ex_value['name'];
@@ -251,6 +253,38 @@ class Mark extends Admin_Controller {
                     }
                 }
                 $array['exam_array'] = $exam_array;
+                if($school_id == 1 && $subject_id != 0)
+                {
+                    $assessment_subjects_data = [];
+                    $assessment_subjects = [];
+                    $wData['subject_id'] = $subject_id;
+                    $wData['student_id'] = $stu_value['id'];
+                    $wData['exam_id'] = $exam_id;
+                    $assessment_subjects_result = $this->subject_model->get($subject_id);
+                    if(!empty($assessment_subjects_result['extra_assessment']))
+                        $assessment_subjects = json_decode($assessment_subjects_result['extra_assessment']);
+
+                    if(!empty($assessment_subjects))
+                    {
+                        $array_count = 0;
+                        foreach ($assessment_subjects as $assessment_subject)
+                        {
+                            $tempArray = [];
+                            $tempArray['name'] = $assessment_subject;
+                            $tempArray['key'] =  set_key_from_subject_name($assessment_subject);
+                            $assessment_subjects_grades = $this->examresult_model->get_assessment_subjects_grades($wData);
+                            $tempArray['grade'] = "";
+                            if(!empty($assessment_subjects_grades->extra_grades))
+                            {
+                                 $extra_grades = json_decode($assessment_subjects_grades->extra_grades);
+                                 $tempArray['grade'] = $extra_grades[$array_count];
+                            }
+                            $assessment_subjects_data[] = $tempArray;
+                            $array_count ++;
+                        }
+                    }
+                    $array['assessment_subjects'] = $assessment_subjects_data;
+                  }
                  if($school_id == 2)
                  {
                      $wData['class_id'] = $class_id;
@@ -382,7 +416,8 @@ class Mark extends Admin_Controller {
                 $exam_id = $this->input->post('exam_id');
                 $student_array = $this->input->post('student');
                 $exam_array = $this->input->post('exam_schedule');
-                foreach ($student_array as $key => $student) {
+                $subject_id = $this->input->post('subject_id');
+                  foreach ($student_array as $key => $student) {
                     foreach ($exam_array as $key => $exam) {
 
                         if ($school_id==1)
@@ -411,6 +446,35 @@ class Mark extends Admin_Controller {
                         $inserted_id = $this->examresult_model->add_exam_result($record,$school_id);
                         if ($inserted_id) {
                             $ex_array[$student] = $exam_id;
+                        }
+                    }
+                    if($school_id==1)
+                    {
+                        $assessment_subjects = [];
+                        $assessment_subjects_result = $this->subject_model->get($subject_id);
+                        $wData['subject_id'] = $subject_id;
+                        $wData['student_id'] = $student;
+                        $wData['exam_id'] = $exam_id;
+                        if(!empty($assessment_subjects_result['extra_assessment']))
+                            $assessment_subjects = json_decode($assessment_subjects_result['extra_assessment']);
+                        if(!empty($assessment_subjects)) {
+                            $assessment_grades = [];
+                            $assessment_grades_data['student_id'] = $student;
+                            $assessment_grades_data['exam_id'] = $exam_id;
+                            $assessment_grades_data['subject_id'] = $subject_id;
+
+                            foreach ($assessment_subjects as $assessment_subject) {
+                                $key =  set_key_from_subject_name($assessment_subject);
+                                $assessment_subjects_grades = $this->examresult_model->get_assessment_subjects_grades($wData);
+                                if(!empty($this->input->post($key. "_" . $student . "_" . $exam)))
+                                {
+                                    $assessment_grades[] = $this->input->post($key. "_" . $student . "_" . $exam);
+                                }else{
+                                    $assessment_grades[] = "";
+                                }
+                            }
+                            $assessment_grades_data['extra_grades'] = json_encode($assessment_grades);
+                            $this->examresult_model->add_pre_primary_assessment_grades($assessment_grades_data);
                         }
                     }
                     if($school_id==2)
@@ -676,6 +740,8 @@ class Mark extends Admin_Controller {
                         $exam_array['exam_name'] = $ex_value['name'];
                         $exam_array['exam_type'] = $ex_value['type'];
                         $student_exam_result = $this->examresult_model->get_result($ex_value['id'], $stu_value['id']);
+                        if(empty($student_exam_result))
+                            continue;
                         $exam_array['attendence'] = $student_exam_result->attendence;
                          if ($school_id==1)
                             {
@@ -812,6 +878,8 @@ class Mark extends Admin_Controller {
                     $array['current_session'] = $this->setting_model->getCurrentSessionName();
                     $array['exam_info'] = $this->examresult_model->getExamType($exam_id)->name;
                     $x = array();
+                    $subjects_names_to_be_compare = [];
+                    $assessment_subject_groups = [];
                     foreach ($examSchedule as $ex_key => $ex_value) {
                         $exam_array = array();
                         $exam_array['exam_schedule_id'] = $ex_value['id'];
@@ -821,6 +889,62 @@ class Mark extends Admin_Controller {
                         $exam_array['passing_marks'] = $ex_value['passing_marks'];
                         $exam_array['exam_name'] = $ex_value['name'];
                         $exam_array['exam_type'] = $ex_value['type'];
+                        $assessment_subjects_result = $this->subject_model->get($ex_value['subject_id']);
+
+                        if($school_id == 1){
+                            $subjects_to_be_compare = [];
+                            $assessment_subjects_data = [];
+                            $assessment_subjects = [];
+                            $wData['subject_id'] = $ex_value['subject_id'];
+                            $wData['student_id'] = $stu_value['id'];
+                            $wData['exam_id'] = $exam_id;
+                            if(!empty($assessment_subjects_result['extra_assessment']))
+                            {
+                                $assessment_subjects = json_decode($assessment_subjects_result['extra_assessment']);
+                                if($assessment_subjects_result['compare'] == 1)
+                                {
+                                    $atempArray['name'] = $assessment_subjects_result['name'];
+                                    $atempArray['id'] = $assessment_subjects_result['id'];
+                                    $subjects_names_to_be_compare[] = $atempArray;
+                                    $subjects_to_be_compare[] = $ex_value['subject_id'];
+
+                                }
+                            }
+                            $exam_array['compare'] = $assessment_subjects_result['compare'];
+                            if(!empty($assessment_subjects))
+                            {
+                                $array_count = 0;
+                                foreach ($assessment_subjects as $assessment_subject)
+                                {
+                                    $tempArray = [];
+                                    $tempArray['name'] = $assessment_subject;
+                                    $tempArray['key'] =  set_key_from_subject_name($assessment_subject);
+                                    $assessment_subjects_grades = $this->examresult_model->get_assessment_subjects_grades($wData);
+                                    $tempArray['grade'] = "";
+                                    if(!empty($assessment_subjects_grades) and !empty($assessment_subjects_grades->extra_grades))
+                                    {
+                                        $extra_grades = json_decode($assessment_subjects_grades->extra_grades);
+                                        $tempArray['grade'] = $extra_grades[$array_count];
+                                    }
+                                    if(!in_array($ex_value['subject_id'],$subjects_to_be_compare))
+                                    {
+                                        $assessment_subjects_data[] = $tempArray;
+                                    }else{
+
+                                        if (!array_key_exists($tempArray['key'],$assessment_subject_groups))
+                                        {
+                                            $tempArray['subject_'.$ex_value['subject_id']] = $tempArray['grade'];
+                                            $assessment_subject_groups[$tempArray['key']] = $tempArray;
+                                        }else{
+                                            $assessment_subject_groups[$tempArray['key']]['subject_'.$ex_value['subject_id']] =  $tempArray['grade'];
+                                        }
+                                    }
+
+                                    $array_count ++;
+                                }
+                            }
+                            $exam_array['assessment_subjects'] = $assessment_subjects_data;
+                        }
                         $student_exam_result = $this->examresult_model->get_result($ex_value['id'], $stu_value['id']);
                          if (empty($student_exam_result)) {
                             $exam_array['exam_result_id']=0;
@@ -836,13 +960,15 @@ class Mark extends Admin_Controller {
 
                             }
                             $exam_array['exam_result_id']=$student_exam_result->id;
-
                         }
-                        $x[] = $exam_array;
+                         if($assessment_subjects_result['compare'] == 0)
+                             $x[] = $exam_array;
                     }
                     if (empty($x)) {
                         $data['examSchedule']['status'] = "no";
                     }
+                    $array['assessment_subject_groups'] = $assessment_subject_groups;
+                    $array['subjects_names_to_be_compare'] = $subjects_names_to_be_compare;
                     $array['exam_array'] = $x;
                     $array['student_remarks'] = "";
                     $remarks_data = $this->examresult_model->getRemarks($stu_value['id'],$exam_id);
@@ -877,9 +1003,38 @@ class Mark extends Admin_Controller {
                 $s = array('status' => 'no');
                 $data['examSchedule'] = $s;
             }
+//            dd($data);
              $this->load->view('admin/mark/print_exam_report', $data);
         }
 
+    }
+    private function set_assessment_subject_grade($array,$temp_array,$value,$subject_id,$key)
+    {
+        $new_array = [];
+        if(!empty($array))
+        {
+            foreach ($array as $item)
+            {
+                if(empty($item['key']))
+                {
+//                    dd('s');
+                    dd($item);
+                    dd($array);
+                }
+
+                if($item['key'])
+                {
+                    $item['subject_'.$subject_id] = $value;
+                }
+                $new_array[] = $item;
+            }
+        }else{
+             $temp_array['subject_'.$subject_id] = $value;
+             $new_array = $temp_array;
+        }
+
+//        dd($new_array);
+        return $new_array;
     }
     function genrateSinglereport($student_id=null)
     {

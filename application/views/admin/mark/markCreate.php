@@ -162,7 +162,12 @@
                                                                     ?>
                                                                     <th>
                                                                         <?php
-                                                                        echo $exam_schedule['exam_name'] . " (" . substr($exam_schedule['exam_type'], 0, 2) . ": " . $exam_schedule['passing_marks'] . "/" . $exam_schedule['full_marks'] . ") ";
+                                                                        if($school_id == 1)
+                                                                        {
+                                                                            echo $exam_schedule['exam_name'];
+                                                                        }else{
+                                                                            echo $exam_schedule['exam_name'] . " (" . substr($exam_schedule['exam_type'], 0, 2) . ": " . $exam_schedule['passing_marks'] . "/" . $exam_schedule['full_marks'] . ") ";
+                                                                        }
                                                                         ?>
                                                                     </th>
                                                                 <?php
@@ -228,8 +233,7 @@
                                                             <div class="form-group">
                                                                 <div class="checkbox">
                                                                     <label><input type="checkbox" <?php echo $check; ?> name="student_absent<?php echo $student['student_id'] . "_" . $exam_schedule['exam_schedule_id']; ?>" value="ABS" <?php if ($exam_schedule['attendence'] == "ABS") echo "checked"; ?>>Abs</label>
-
-                                                                <input type="hidden" name="subject_id" value="<?php echo $exam_schedule["subject_id"] ?>">
+                                                                    <input type="hidden" name="subject_id" value="<?php echo $exam_schedule["subject_id"] ?>">
                                                                 <?php
                                                                 if(empty($exam_schedule['get_marks']))
                                                                 {
@@ -238,12 +242,14 @@
                                                                 if($school_id==1)
                                                                 {
                                                                     ?>
-                                                                    <label for="CW">Select Grade</label>
+<!--                                                                    <label>Select Grade</label>-->
                                                                     <select  <?=$select_class?> class="form-control" name="student_number<?php echo $student['student_id'] . "_" . $exam_schedule['exam_schedule_id']; ?>" id="subject_<?php echo $student['student_id'] . "_" . $exam_schedule['exam_schedule_id']; ?>" >
+                                                                        <option value="">Select</option>
                                                                         <option value="A" <?php if($exam_schedule['get_marks'] == "A"){echo "selected";} ?> >A</option>
                                                                         <option value="B" <?php if($exam_schedule['get_marks'] == "B"){echo "selected";} ?> >B</option>
                                                                         <option value="C" <?php if($exam_schedule['get_marks'] == "C"){echo "selected";} ?>>C</option>
                                                                         <option value="D" <?php if($exam_schedule['get_marks'] == "D"){echo "selected";} ?>>D</option>
+                                                                        <option value="E" <?php if($exam_schedule['get_marks'] == "E"){echo "selected";} ?>>E</option>
 
                                                                     </select>
                                                                     <?php
@@ -280,6 +286,44 @@
                                                      ?>
                                                     </tr>
                                                      <?php
+                                                     if($school_id == 1 and !empty($student['assessment_subjects']))
+                                                     {
+                                                         ?>
+                                                         <tr>
+                                                             <td colspan="3">
+                                                                     <?php
+                                                                     $subjects_count = 1;
+                                                                     foreach ($student['assessment_subjects'] as $assessment_subject)
+                                                                     {
+                                                                         $subject_key = $assessment_subject['key'];
+                                                                         $subject_name = $assessment_subject['name'];
+                                                                         $subject_grade = $assessment_subject['grade'];
+                                                                         if($subjects_count == 1 or $subjects_count == 5 or $subjects_count == 9)
+                                                                             echo '<div class="col-md-12">';
+                                                                          ?>
+                                                                         <div class="col-md-3">
+                                                                             <label for="<?=$subject_key?>"><?=ucfirst($subject_name)?></label>
+                                                                             <select id="<?=$subject_key?>" class="form-control" name="<?=$subject_key?>_<?php echo $student['student_id'] . "_" . $exam_schedule['exam_schedule_id']; ?>" >
+                                                                                 <option value="">Select</option>
+                                                                                 <option value="Ex" <?php   if( $subject_grade == "Ex")   {echo "selected";} ?> >Ex</option>
+                                                                                 <option value="G"  <?php   if( $subject_grade == "G")    {echo "selected";} ?> >G</option>
+                                                                                 <option value="S"  <?php   if( $subject_grade == "S")    {echo "selected";}?>>S</option>
+                                                                                 <option value="NI" <?php   if( $subject_grade == "NI")   {echo "selected";}?>>N.I</option>
+
+                                                                             </select>
+                                                                         </div>
+                                                                         <?php
+                                                                         if($subjects_count == 4 or $subjects_count == 8 or $subjects_count == 12)
+                                                                             echo '</div>';
+                                                                         $subjects_count++;
+                                                                     }
+                                                                     ?>
+
+
+                                                             </td>
+                                                         </tr>
+                                                         <?php
+                                                     }
                                                      if($school_id == 2)
                                                      {
                                                           ?>
@@ -319,42 +363,42 @@
                                                              </td>
                                                          </tr>
                                                          <tr>
-                                                                 <td colspan="3">
-                                                                     <div class="col-md-12">
-                                                                         <?php
-                                                                         $general_progress_subjects = primary_extra_grades('progress');
-                                                                         foreach ($general_progress_subjects as $progress_subject)
+                                                             <td colspan="3">
+                                                                 <div class="col-md-12">
+                                                                     <?php
+                                                                     $general_progress_subjects = primary_extra_grades('progress');
+                                                                     foreach ($general_progress_subjects as $progress_subject)
+                                                                         {
+                                                                             $subject_key = $progress_subject['key'];
+                                                                             $subject_name = $progress_subject['name'];
+                                                                             $subject_grade = "";
+                                                                             if(!empty($student['progress_grades']))
                                                                              {
-                                                                                 $subject_key = $progress_subject['key'];
-                                                                                 $subject_name = $progress_subject['name'];
-                                                                                 $subject_grade = "";
-                                                                                 if(!empty($student['progress_grades']))
+                                                                                 if(!empty($student['progress_grades']->$subject_key))
                                                                                  {
-                                                                                     if(!empty($student['progress_grades']->$subject_key))
-                                                                                     {
-                                                                                         $subject_grade = $student['progress_grades']->$subject_key;
-                                                                                     }
+                                                                                     $subject_grade = $student['progress_grades']->$subject_key;
                                                                                  }
-                                                                                 ?>
-                                                                                 <div class="col-md-2">
-                                                                                     <label for="<?=$subject_key?>"><?=ucfirst($subject_name)?></label>
-                                                                                     <select id="<?=$subject_key?>" class="form-control" name="<?=$subject_key?>_<?php echo $student['student_id'] . "_" . $exam_schedule['exam_schedule_id']; ?>" >
-                                                                                         <option value="">Select</option>
-                                                                                         <option value="Ex" <?php if( $subject_grade == "Ex"){echo "selected";} ?> >Ex</option>
-                                                                                         <option value="G"  <?php if( $subject_grade == "G"){echo "selected";} ?> >G</option>
-                                                                                         <option value="S"  <?php if( $subject_grade == "S"){echo "selected";}?>>S</option>
-                                                                                         <option value="NI" <?php if( $subject_grade == "NI"){echo "selected";}?>>N.I</option>
-
-                                                                                     </select>
-                                                                                 </div>
-                                                                                 <?php
                                                                              }
-                                                                         ?>
-                                                                     </div>
+                                                                             ?>
+                                                                             <div class="col-md-2">
+                                                                                 <label for="<?=$subject_key?>"><?=ucfirst($subject_name)?></label>
+                                                                                 <select id="<?=$subject_key?>" class="form-control" name="<?=$subject_key?>_<?php echo $student['student_id'] . "_" . $exam_schedule['exam_schedule_id']; ?>" >
+                                                                                     <option value="">Select</option>
+                                                                                     <option value="Ex" <?php if( $subject_grade == "Ex"){echo "selected";} ?> >Ex</option>
+                                                                                     <option value="G"  <?php if( $subject_grade == "G"){echo "selected";} ?> >G</option>
+                                                                                     <option value="S"  <?php if( $subject_grade == "S"){echo "selected";}?>>S</option>
+                                                                                     <option value="NI" <?php if( $subject_grade == "NI"){echo "selected";}?>>N.I</option>
+
+                                                                                 </select>
+                                                                             </div>
+                                                                             <?php
+                                                                         }
+                                                                     ?>
+                                                                 </div>
 
 
-                                                                 </td>
-                                                             </tr>
+                                                             </td>
+                                                         </tr>
                                                          <?php
                                                      }
                                                      ?>
@@ -364,7 +408,7 @@
                                                          ?>
                                                          <td colspan="3">
                                                              <textarea <?php echo $class; ?> name="remarks_<?=$student['student_id']?>"
-                                                                    placeholder="Enter Remarks" class="form-control input-sm"
+                                                                    placeholder="Enter Remarks for <?=$student['firstname']?>" class="form-control input-sm"
                                                                     id="remarks_<?=$student['student_id']?>" ><?php if(!empty($get_remarks)){echo $get_remarks->remarks;} ?></textarea>
                                                          </td>
                                                      </tr>

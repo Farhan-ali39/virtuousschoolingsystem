@@ -51,6 +51,7 @@ class Subject extends Admin_Controller {
                 'code' => $this->input->post('code'),
                 'school_id' => $this->input->post('school_type'),
                 'type' => $this->input->post('type'),
+                'compare' => $this->input->post('compare'),
                 'extra_assessment'=>$extra_encoded
             );
             $this->subject_model->add($data);
@@ -139,6 +140,7 @@ class Subject extends Admin_Controller {
                 'name' => $this->input->post('name'),
                 'code' => $this->input->post('code'),
                 'type' => $this->input->post('type'),
+                'compare' => $this->input->post('compare'),
                 'extra_assessment'=>$extra_encoded
             );
             $this->subject_model->add($data);

@@ -406,6 +406,25 @@ class Examresult_model extends CI_Model {
             return $insert_id;
         }
     }
+
+    public function add_pre_primary_assessment_grades($data)
+    {
+        $this->db->where('student_id', $data['student_id']);
+        $this->db->where('exam_id', $data['exam_id']);
+        $this->db->where('subject_id', $data['subject_id']);
+        $q = $this->db->get('pre_primary_extra_grade');
+        $result = $q->row();
+        if ($q->num_rows() > 0)
+        {
+            $this->db->where('grade_id', $result->grade_id);
+            $this->db->update('pre_primary_extra_grade', $data);
+            return $result->grade_id;
+        }else{
+            $this->db->insert('pre_primary_extra_grade', $data);
+            $insert_id = $this->db->insert_id();
+            return $insert_id;
+        }
+    }
     public function get_primary_extra_subjects($data)
     {
         $this->db->select('*')->from('tbl_primary_extra_subject_grades');
@@ -423,5 +442,21 @@ class Examresult_model extends CI_Model {
              return $obj;
         }
 
+    }
+
+    public function get_assessment_subjects_grades($data)
+    {
+        $this->db->select('extra_grades')->from('pre_primary_extra_grade');
+        $this->db->where('student_id', $data['student_id']);
+        $this->db->where('exam_id', $data['exam_id']);
+        $this->db->where('subject_id', $data['subject_id']);
+        $query = $this->db->get();
+        if ($query->num_rows() > 0) {
+            return $query->row();
+        } else {
+            $obj = new stdClass();
+            $obj->extra_grades = [];
+            return $obj;
+        }
     }
 }

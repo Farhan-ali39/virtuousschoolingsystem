@@ -1,1 +1,8 @@
-add new table tbl_primary_extra_subject_grades
+add new table tbl_primary_extra_subject_grades ----- Done
+
+ALTER TABLE `virtuousschoolingsystem`.`pre_primary_extra_grade`   ----- Done
+ADD COLUMN `exam_id` int NULL AFTER `student_id`;
+
+
+ALTER TABLE `virtuousschoolingsystem`.`subjects`                ----- Done
+ADD COLUMN `compare` bit(1) NULL DEFAULT 0 AFTER `school_id`;
