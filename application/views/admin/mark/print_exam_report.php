@@ -81,7 +81,7 @@ if($school_id == 1)
             <div class="wrapper">
                 <table style="margin-top: .3in; width: 100%">
                     <tr style="text-align: left;">
-                        <th style="width: 100px;"><img src="<?= base_url('uploads/') ?>logo.jpg"></th>
+                        <th style="width: 100px;"><img style="width: 100px;height: 100px"  src="<?= base_url('uploads/') ?>logo.jpg"></th>
                         <!--                                        <th style="padding-left: 155px;line-height: 5px;"><h2>Leadership School</h2>-->
                         <!--                                            <p>PECHS Campus</p>-->
                         <th style="padding-left: 155px;line-height: 5px;"><h2>Student 's Monthly Progress Report</h2>
@@ -321,7 +321,7 @@ elseif($school_id == 2)
         <div class="wrapper">
              <table style="margin-top: .3in; width: 100%">
                 <tr style="text-align: left;">
-                    <th style="width: 100px;"><img src="<?= base_url('uploads/') ?>logo.jpg"></th>
+                    <th style="width: 100px;"><img style="width: 100px;height: 100px" src="<?= base_url('uploads/') ?>logo.jpg"></th>
 <!--                                        <th style="padding-left: 155px;line-height: 5px;"><h2>Leadership School</h2>-->
 <!--                                            <p>PECHS Campus</p>-->
                     <th style="padding-left: 155px;line-height: 5px;"><h2>Student 's Monthly Progress Report</h2>
