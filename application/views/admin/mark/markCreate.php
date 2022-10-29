@@ -305,10 +305,10 @@
                                                                              <label for="<?=$subject_key?>"><?=ucfirst($subject_name)?></label>
                                                                              <select id="<?=$subject_key?>" class="form-control" name="<?=$subject_key?>_<?php echo $student['student_id'] . "_" . $exam_schedule['exam_schedule_id']; ?>" >
                                                                                  <option value="">Select</option>
-                                                                                 <option value="Ex" <?php   if( $subject_grade == "Ex")   {echo "selected";} ?> >Ex</option>
-                                                                                 <option value="G"  <?php   if( $subject_grade == "G")    {echo "selected";} ?> >G</option>
-                                                                                 <option value="S"  <?php   if( $subject_grade == "S")    {echo "selected";}?>>S</option>
-                                                                                 <option value="NI" <?php   if( $subject_grade == "NI")   {echo "selected";}?>>N.I</option>
+                                                                                 <option value="A" <?php   if( $subject_grade == "A")   {echo "selected";} ?> >A</option>
+                                                                                 <option value="B"  <?php   if( $subject_grade == "B")    {echo "selected";} ?> >B</option>
+                                                                                 <option value="C"  <?php   if( $subject_grade == "C")    {echo "selected";}?>>C</option>
+                                                                                 <option value="D" <?php   if( $subject_grade == "D")   {echo "selected";}?>>D</option>
 
                                                                              </select>
                                                                          </div>
