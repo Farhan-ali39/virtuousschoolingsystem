@@ -361,12 +361,12 @@ elseif($school_id == 2)
             </div>
             <table id="customers" style="width:100%">
                 <tr>
-                    <th>Sr#</th>
-                    <th>Subject</th>
-                    <th>Total Marks</th>
-                    <th>Obtained Marks</th>
-                    <th>Total %</th>
-                    <th>Grade</th>
+                    <th style="text-align: center">Sr#</th>
+                    <th style="text-align: center">Subject</th>
+                    <th style="text-align: center">Total Marks</th>
+                    <th style="text-align: center">Obtained Marks</th>
+                    <th style="text-align: center">Total %</th>
+                    <th style="text-align: center">Grade</th>
                 </tr>
                 <?php
                 $sr = 1;
@@ -374,26 +374,55 @@ elseif($school_id == 2)
                 $total_marks = 0;
                 $ci =& get_instance();
                 $ci->load->model('Examresult_model');
+                $APlus=0;
+                $A=0;
+                $B=0;
+                $C=0;
+                $D=0;
                 foreach ($student['exam_array'] as $value) {
-                    $total_obtain_marks = $total_obtain_marks + $value['get_marks'];
-                    $total_marks = $total_marks + $value['full_marks'];
+                     $total_marks += $value['full_marks'];
                     ?>
                     <tr>
-                        <td><?= $sr ?></td>
-                        <td><?= $value['exam_name'] ?></td>
+                        <td style="text-align: center"><?= $sr ?></td>
+                        <td style="text-align: center"><?= $value['exam_name'] ?></td>
                         <td style="text-align: center"><?= $value['full_marks'] ?></td>
                         <?php
+                        $subject_percentage = "";
+                        $subject_grade = "";
                         if($value['attendence']=="ABS")
                         {
                             $get_marks="ABS";
+                            $subject_grade="ABS";
                         }else
                         {
                             $get_marks=$value['get_marks'];
+                            $total_obtain_marks+=$get_marks;
+                            $subject_percentage = ($get_marks/$value['full_marks'])*100;
+                             if(fmod($subject_percentage, 1) !== 0.00){
+                                $subject_percentage = number_format((float)$subject_percentage,2,'.','');
+                            }
+
+                            if ($get_marks >= 89.50 && $get_marks <= 100) {
+                                $APlus++;
+                                $subject_grade =  "A+";
+                            } elseif ($get_marks >= 79.50 && $get_marks <= 89.49) {
+                                $subject_grade = "A";
+                                $A++;
+                            } elseif ($get_marks >= 69.50 && $get_marks <= 79.49) {
+                                $subject_grade = "B";
+                                $B++;
+                            } elseif ($get_marks >= 59.50 && $get_marks <= 69.49) {
+                                $subject_grade = "C";
+                                $C++;
+                            } elseif ($get_marks >= 0 && $get_marks <= 59.49) {
+                                $subject_grade = "D";
+                                $D++;
+                            }
                         }
-                        ?>
+                         ?>
                         <td style="text-align: center"><?=$get_marks?></td>
-                        <td style="text-align: center"><?=$get_marks?></td>
-                        <td style="text-align: center"><?=$get_marks?></td>
+                        <td style="text-align: center"><?=$subject_percentage?>%</td>
+                        <td style="text-align: center"><?=$subject_grade?></td>
                      </tr>
 
                     <?php
@@ -405,10 +434,23 @@ elseif($school_id == 2)
                 <tbody>
                 <tr>
                     <td colspan="2">Overall percentage</td>
-                    <td><?= $total_marks ?></td>
+                    <td><?= round(($total_obtain_marks / $total_marks) * 100,2) ?>%</td>
                     <td >Overall grade </td>
-                    <td  ><?= round($total_obtain_marks / $total_marks * 100,2) ?>
-                        %
+                    <td >
+                        <?php
+                        $overall_marks = ($total_obtain_marks / $total_marks) * 100;
+                        if ($overall_marks >= 89.50 && $overall_marks <= 100) {
+                            echo  "A+";
+                        } elseif ($overall_marks >= 79.50 && $overall_marks <= 89.49) {
+                            echo "A";
+                        } elseif ($overall_marks >= 69.50 && $overall_marks <= 79.49) {
+                            echo "B";
+                        } elseif ($overall_marks >= 59.50 && $overall_marks <= 69.49) {
+                            echo "C";
+                        } elseif ($overall_marks >= 0 && $overall_marks <= 59.49) {
+                            echo "D";
+                        }
+                        ?>
                     </td>
                 </tr>
                 </tbody>
