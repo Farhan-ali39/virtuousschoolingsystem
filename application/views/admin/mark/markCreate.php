@@ -309,6 +309,7 @@
                                                                                  <option value="B"  <?php   if( $subject_grade == "B")    {echo "selected";} ?> >B</option>
                                                                                  <option value="C"  <?php   if( $subject_grade == "C")    {echo "selected";}?>>C</option>
                                                                                  <option value="D" <?php   if( $subject_grade == "D")   {echo "selected";}?>>D</option>
+                                                                                 <option value="E" <?php   if( $subject_grade == "E")   {echo "selected";}?>>E</option>
 
                                                                              </select>
                                                                          </div>
