@@ -243,7 +243,7 @@
                                                                 {
                                                                     ?>
 <!--                                                                    <label>Select Grade</label>-->
-                                                                    <select  <?=$select_class?> class="form-control" name="student_number<?php echo $student['student_id'] . "_" . $exam_schedule['exam_schedule_id']; ?>" id="subject_<?php echo $student['student_id'] . "_" . $exam_schedule['exam_schedule_id']; ?>" >
+                                                                    <select  <?=$select_class?> class="form-control" style="display: none" name="student_number<?php echo $student['student_id'] . "_" . $exam_schedule['exam_schedule_id']; ?>" id="subject_<?php echo $student['student_id'] . "_" . $exam_schedule['exam_schedule_id']; ?>" >
                                                                         <option value="">Select</option>
                                                                         <option value="A" <?php if($exam_schedule['get_marks'] == "A"){echo "selected";} ?> >A</option>
                                                                         <option value="B" <?php if($exam_schedule['get_marks'] == "B"){echo "selected";} ?> >B</option>
