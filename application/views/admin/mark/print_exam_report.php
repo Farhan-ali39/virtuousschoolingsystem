@@ -79,14 +79,15 @@ if($school_id == 1)
             </head>
             <body>
             <div class="wrapper">
-                <table style="margin-top: .3in; width: 100%">
+<!--                <table style="margin-top: .3in; width: 100%">-->
+                <table style="width: 100%">
                     <tr style="text-align: left;">
-                        <th style="width: 100px;"><img style="width: 100px;height: 100px"  src="<?= base_url('uploads/') ?>logo.jpg"></th>
-                        <!--                                        <th style="padding-left: 155px;line-height: 5px;"><h2>Leadership School</h2>-->
-                        <!--                                            <p>PECHS Campus</p>-->
-                        <th style="padding-left: 155px;line-height: 5px;"><h2>Student 's Monthly Progress Report</h2>
+                        <th style="width: 100px;"><img style="width: 50%;height: 100px;margin-left: 25%;"  src="<?= base_url('uploads/report_header.jpeg') ?>"></th>
                     </tr>
                 </table>
+                <div style="margin: 0px;text-align: center">
+                    <h2 style="margin: 2px">RESULT SHEET</h2>
+                </div>
                 <div style=" height: 65px; float: left; width: 350px; border: 2px solid;">
                     <div style=" text-align: right;width: 30%; float: left;">
                         <b><p>Student Name:<br>
@@ -319,14 +320,15 @@ elseif($school_id == 2)
         </head>
         <body>
         <div class="wrapper">
-             <table style="margin-top: .3in; width: 100%">
+            <!--                <table style="margin-top: .3in; width: 100%">-->
+            <table style="width: 100%">
                 <tr style="text-align: left;">
-                    <th style="width: 100px;"><img style="width: 100px;height: 100px" src="<?= base_url('uploads/') ?>logo.jpg"></th>
-<!--                                        <th style="padding-left: 155px;line-height: 5px;"><h2>Leadership School</h2>-->
-<!--                                            <p>PECHS Campus</p>-->
-                    <th style="padding-left: 155px;line-height: 5px;"><h2>Student 's Monthly Progress Report</h2>
+                    <th style="width: 100px;"><img style="width: 50%;height: 100px;margin-left: 25%;"  src="<?= base_url('uploads/report_header.jpeg') ?>"></th>
                 </tr>
             </table>
+            <div style="margin: 0px;text-align: center">
+                <h2 style="margin: 2px">RESULT SHEET</h2>
+            </div>
             <div style=" height: 65px; float: left; width: 350px; border: 2px solid;">
                 <div style=" text-align: right;width: 30%; float: left;">
                     <b><p>Student Name:<br>
@@ -402,19 +404,19 @@ elseif($school_id == 2)
                                 $subject_percentage = number_format((float)$subject_percentage,2,'.','');
                             }
 
-                            if ($get_marks >= 89.50 && $get_marks <= 100) {
+                            if ($subject_percentage >= 89.50 && $subject_percentage <= 100) {
                                 $APlus++;
                                 $subject_grade =  "A+";
-                            } elseif ($get_marks >= 79.50 && $get_marks <= 89.49) {
+                            } elseif ($subject_percentage >= 79.50 && $subject_percentage <= 89.49) {
                                 $subject_grade = "A";
                                 $A++;
-                            } elseif ($get_marks >= 69.50 && $get_marks <= 79.49) {
+                            } elseif ($subject_percentage >= 69.50 && $subject_percentage <= 79.49) {
                                 $subject_grade = "B";
                                 $B++;
-                            } elseif ($get_marks >= 59.50 && $get_marks <= 69.49) {
+                            } elseif ($subject_percentage >= 59.50 && $subject_percentage <= 69.49) {
                                 $subject_grade = "C";
                                 $C++;
-                            } elseif ($get_marks >= 0 && $get_marks <= 59.49) {
+                            } elseif ($subject_percentage >= 0 && $subject_percentage <= 59.49) {
                                 $subject_grade = "D";
                                 $D++;
                             }
